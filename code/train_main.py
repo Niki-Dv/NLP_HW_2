@@ -98,6 +98,7 @@ def predict(net, device, loader, loss_func):
 def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCHS = 15, BATCH_SIZE = 1, lr=0.001,
               plot_progress=True, results_dir_path='.'):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Device used is: {device}")
     net.to(device)
     net.train()
     optimizer = optim.Adam(net.parameters(), lr=lr)
