@@ -124,7 +124,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
 
             if i % BATCH_SIZE == 0:
                 loss /= NUM_WORDS_BATCH
-                train_loss_lst.append(loss.cpu())
+                train_loss_lst.append(loss.item())
                 optimizer.step()
                 net.zero_grad()
                 NUM_WORDS_BATCH = 0
