@@ -149,9 +149,10 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
 
 ##################################################################################################################
 if __name__ == '__main__':
-    WORD_EMBEDDING_DIM = 300
-    TAG_EMBEDDING_DIM = 46
-    HIDDEN_DIM = 100
+    WORD_EMBEDDING_DIM = 100
+    TAG_EMBEDDING_DIM = 25
+    LSTM_HIDDEN_DIM = 125
+    MLP_HIDDEN_DIM = 100
     BATCH_SIZE = 40
     EPOCHS = 15
     LR = 0.01
@@ -168,7 +169,7 @@ if __name__ == '__main__':
     tag_vocab_size = len(train_dataset.pos_idx_mappings)
 
     base_model = models.BasicDependencyParserModel(word_vocab_size, tag_vocab_size, WORD_EMBEDDING_DIM, TAG_EMBEDDING_DIM,
-                                              hidden_dim=HIDDEN_DIM, mlp_dim_out=32)
+                                              hidden_dim=LSTM_HIDDEN_DIM, mlp_dim_out=MLP_HIDDEN_DIM)
 
     res_dir = opj(net_results_dir,time.strftime("%Y%m%d-%H%M%S") )
     if not os.path.isdir(res_dir):

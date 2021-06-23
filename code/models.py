@@ -7,7 +7,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 ##################################################################################################################
 class BasicDependencyParserModel(nn.Module):
     def __init__(self, word_vocab_size, pos_vocab_size, word_emb_dim=100, pos_emb_dim=25,
-                 hidden_dim=100, mlp_dim_out=32, lstm_layers=2):
+                 hidden_dim=125, mlp_dim_out=100, lstm_layers=2):
 
         super(BasicDependencyParserModel, self).__init__()
 
