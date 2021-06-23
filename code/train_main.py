@@ -172,7 +172,7 @@ if __name__ == '__main__':
                                               hidden_dim=HIDDEN_DIM, mlp_dim_out=32)
 
     res_dir = opj(net_results_dir,time.strftime("%Y%m%d-%H%M%S") )
-    if not res_dir:
+    if not os.path.isdir(res_dir):
         os.makedirs(res_dir)
     train_net(base_model, train_dataloader, test_dataloader, nll_loss_func, EPOCHS=EPOCHS, BATCH_SIZE=BATCH_SIZE, lr=LR,
               plot_progress=True, results_dir_path= res_dir)
