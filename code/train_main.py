@@ -156,7 +156,7 @@ if __name__ == '__main__':
     EPOCHS = 15
     LR = 0.01
 
-    paths_list = [path_train]
+    paths_list = [path_train, path_test]
     word_dict, pos_dict = dataset.get_vocabs(paths_list)
     train_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'train', padding=False)
     train_dataloader = DataLoader(train_dataset, shuffle=True)
