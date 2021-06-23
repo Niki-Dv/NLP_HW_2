@@ -38,18 +38,19 @@ import dataset, models
 
 DEBUG = 500
 
-def plot_net_results(acc, loss, epoch, dir_save_path, prefix_str=""):
+def plot_net_results(acc_list, loss_list, epoch, dir_save_path, prefix_str=""):
     fig, ax1 = plt.subplots(figsize=(12, 4))
-    ax1.plot(list(range(1, 1 + len(loss))), loss)
+    ax1.plot(list(range(1, 1 + len(loss_list))), loss_list)
     ax1.set_xlabel('Epoch')
     ax1.set_ylabel('Loss')
     ax1.tick_params(axis='y')
 
-    ax2 = ax1.twinx()
-    ax2.plot(list(range(len(acc))), acc)
-    ax2 = ax1.twinx()
-    ax2.set_ylabel('UAS')
-    ax2.tick_params(axis='y')
+    if len(acc_list) !=0:
+        ax2 = ax1.twinx()
+        ax2.plot(list(range(len(acc_list))), acc_list)
+        ax2 = ax1.twinx()
+        ax2.set_ylabel('UAS')
+        ax2.tick_params(axis='y')
 
     fig.tight_layout()
     fig.suptitle(f'Results summary for epoch: {epoch} ')
@@ -105,7 +106,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
     optimizer = optim.Adam(net.parameters(), lr=lr)
 
     print("Training Started")
-    test_loss_lst, test_acc_lst, train_loss_lst, train_acc_lst = [], [], [], []
+    test_loss_lst, test_acc_lst, train_loss_lst= [], [], []
     best_acc = 0
 
     for epoch in range(EPOCHS):
@@ -123,8 +124,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
 
             if i % BATCH_SIZE == 0:
                 loss /= NUM_WORDS_BATCH
-                train_loss_lst.append(train_loss)
-                train_acc_lst.append(train_acc)
+                train_loss_lst.append(loss)
                 optimizer.step()
                 net.zero_grad()
                 NUM_WORDS_BATCH = 0
@@ -138,9 +138,6 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
             net.save(save_path)
             best_acc = test_acc
 
-        if plot_progress:
-            train_acc, train_loss = predict(net, device, train_dataloader, loss_func)
-
         print(f"Epoch [{epoch + 1}/{EPOCHS}]. \t Test Loss: {test_loss:.2f}"
               f" \t Test Accuracy: {test_acc:.2f}."
               f"Train average Loss: {np.average(train_loss_lst):.2f}"
@@ -149,7 +146,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
     plot_net_results(test_acc_lst, test_loss_lst, epoch, results_dir_path, 'test_res_plots')
 
     if plot_progress:
-        plot_net_results(train_acc_lst, train_loss_lst, epoch, results_dir_path, 'train_res_plots.png')
+        plot_net_results([], train_loss_lst, epoch, results_dir_path, 'train_res_plots.png')
 
 ##################################################################################################################
 if __name__ == '__main__':
