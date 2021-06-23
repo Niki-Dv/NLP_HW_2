@@ -39,23 +39,22 @@ import dataset, models
 DEBUG = None
 
 def plot_net_results(acc_list, loss_list, epoch, dir_save_path, prefix_str=""):
-    fig, ax1 = plt.subplots(figsize=(12, 4))
-    ax1.plot(list(range(1, 1 + len(loss_list))), loss_list)
-    ax1.set_xlabel('Epoch')
-    ax1.set_ylabel('Loss')
-    ax1.tick_params(axis='y')
+    f = plt.figure()
+    axes = f.add_subplot(111)
+    axes.plot(list(range(1, 1 + len(loss_list))), loss_list, color='red', label='loss')
+    axes.set_xlabel('Epoch')
+    axes.set_ylabel('Loss')
 
-    if len(acc_list) !=0:
-        ax2 = ax1.twinx()
-        ax2.plot(list(range(len(acc_list))), acc_list)
-        ax2 = ax1.twinx()
-        ax2.set_ylabel('UAS')
-        ax2.tick_params(axis='y')
+    if len(acc_list) != 0:
+        axes.plot(list(range(len(acc_list))), acc_list, color='blue', label='acc')
+        axes.set_ylabel('UAS')
+        axes.tick_params(axis='y')
+        axes.legend()
 
-    fig.tight_layout()
-    fig.suptitle(f'Results summary for epoch: {epoch} ')
-    fig.savefig(opj(dir_save_path, prefix_str + f"prog_plot_epoch {epoch}"))
-    plt.close()
+    f.tight_layout()
+    f.suptitle(f'Results summary for epoch: {epoch} ')
+    f.savefig(opj(dir_save_path, prefix_str + f"prog_plot_epoch {epoch}"))
+    plt.close('all')
 
 def nll_loss_func(scores, target):
     """
@@ -174,6 +173,7 @@ if __name__ == '__main__':
     res_dir = opj(net_results_dir,time.strftime("%Y%m%d-%H%M%S") )
     if not os.path.isdir(res_dir):
         os.makedirs(res_dir)
+
     train_net(base_model, train_dataloader, test_dataloader, nll_loss_func, EPOCHS=EPOCHS, BATCH_SIZE=BATCH_SIZE, lr=LR,
               plot_progress=True, results_dir_path= res_dir)
 
