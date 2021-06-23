@@ -70,14 +70,14 @@ def nll_loss_func(scores, target):
     output = nllloss(m(scores), target)
     return output
 
-def predict_dep(scores):
-    predictions = []
+def predict_edges(scores):
+    edge_predictions = []
     for sentence_scores in scores:
         score_matrix = sentence_scores.cpu().detach().numpy()
         score_matrix[:, 0] = float("-inf")
         mst, _ = decode_mst(score_matrix, len(score_matrix), has_labels=False)
-        predictions.append(mst)
-    return np.array(predictions)
+        edge_predictions.append(mst)
+    return np.array(edge_predictions)
 
 def predict(net, device, loader, loss_func):
     net.eval()
@@ -85,10 +85,11 @@ def predict(net, device, loader, loss_func):
     for i, sentence in enumerate(tqdm(loader)):
         if DEBUG is not None and i == DEBUG:
             break
+
         headers = sentence[2].to(device)
         scores = net(sentence)
         loss += loss_func(scores, headers).item()
-        predictions = predict_dep(scores)[:, 1:]
+        predictions = predict_edges(scores)[:, 1:]
         headers = headers.to("cpu").numpy()[:, 1:]
         acc += np.sum(headers == predictions)
         num_of_edges += predictions.size
@@ -114,7 +115,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
             if DEBUG is not None and i == DEBUG:
                 break
             headers = sentence[2].to(device)
-            sentence_len = sentence[3]
+            sentence_len = sentence[3].to(device)
             scores = net(sentence)
             loss = loss_func(scores, headers) * sentence_len
             NUM_WORDS_BATCH += sentence_len
