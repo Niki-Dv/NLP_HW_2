@@ -27,8 +27,8 @@ curr_dir = pathlib.Path(__file__).parent.absolute()
 if curr_dir not in sys.path:
     sys.path.append(curr_dir)
 
-data_dir = opj(curr_dir, '..\\data')
-net_results_dir = opj(curr_dir, '..\\net_results')
+data_dir = opj(curr_dir, '../data')
+net_results_dir = opj(curr_dir, '../net_results')
 path_train = opj(data_dir, "train.labeled")
 path_test = opj(data_dir, "test.labeled")
 
