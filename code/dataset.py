@@ -104,6 +104,7 @@ class PosDataReader:
                 word = splited_words[1].lower()
                 pos_tag = splited_words[2]
                 head_idx = int(splited_words[3])
+
                 cur_sentence.append((word, pos_tag, head_idx))
 
     def get_num_sentences(self):
@@ -115,7 +116,7 @@ class PosDataReader:
 
 class PosDataset(Dataset):
     def __init__(self, word_dict, pos_dict, dir_path: str, subset: str,
-                 padding=False, word_embeddings=None):
+                 padding=False, word_embeddings=None, alpha_dropout=0.25):
         """
         :param word_dict:
         :param pos_dict:
@@ -125,6 +126,8 @@ class PosDataset(Dataset):
         :param word_embeddings:
         """
         super().__init__()
+
+        self.alpha_dropout = alpha_dropout
 
         assert subset in ['train', 'test']
         self.subset = subset
@@ -190,6 +193,16 @@ class PosDataset(Dataset):
             pos_idx_list = []
             head_idx_list = []
             for word, pos, head_idx in sentence:
+                word_app = self.datareader.word_dict.get(word)
+                word_app = 0 if word_app is None else word_app
+                if self.alpha_dropout > 0 and word != ROOT_TOKEN:
+                    prob_for_drop = self.alpha_dropout / (word_app + self.alpha_dropout)
+                    if prob_for_drop > np.random.rand():
+                        word = UNKNOWN_TOKEN
+
+                if self.pos_idx_mappings.get(pos) is None and pos != ROOT_TOKEN:
+                    pos = UNKNOWN_TOKEN
+
                 words_idx_list.append(self.word_idx_mappings.get(word))
                 pos_idx_list.append(self.pos_idx_mappings.get(pos))
                 head_idx_list.append(head_idx)
