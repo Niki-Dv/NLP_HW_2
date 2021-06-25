@@ -35,7 +35,7 @@ path_test = opj(data_dir, "test.labeled")
 torch.manual_seed(1)
 import dataset, models
 
-
+ROUND_NUM_DIGITS = 4
 DEBUG = None
 ##################################################################################################################
 def plot_net_results(acc_list, loss_list, epoch, dir_save_path, prefix_str=""):
@@ -142,9 +142,9 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
             net.save(save_path)
             best_acc = test_acc
 
-        print(f"\nEpoch [{epoch + 1}/{EPOCHS}]. \t Test word avg loss: {test_loss:.2f}"
-              f" \t Test Accuracy: {test_acc:.2f}."
-              f"\t Train sentence avg loss: {np.average(train_loss_lst):.2f}"
+        print(f"\nEpoch [{epoch + 1}/{EPOCHS}]. \t Test word avg loss: {test_loss:.{ROUND_NUM_DIGITS}f}"
+              f" \t Test Accuracy: {test_acc:.{ROUND_NUM_DIGITS}f}."
+              f"\t Train sentence avg loss: {np.average(train_loss_lst):.{ROUND_NUM_DIGITS}f}"
               f"\t Time for epoch: {time.time()-t0}")
 
     plot_net_results([], train_loss_lst, epoch, results_dir_path, 'train_res_plots')
