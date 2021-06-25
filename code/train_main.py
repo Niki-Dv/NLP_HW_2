@@ -1,5 +1,6 @@
 import os
 import sys
+from itertools import product
 from typing import Callable, Any
 import pandas as pd
 import numpy as np
@@ -8,6 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import random
+import pickle
 from torch.nn import LogSoftmax, NLLLoss
 from torch.utils.data.dataloader import DataLoader
 from collections import defaultdict
@@ -99,7 +101,7 @@ def predict(net, device, loader, loss_func):
     return acc / num_of_edges, loss / len(loader)
 ##################################################################################################################
 def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCHS = 15, BATCH_SIZE = 1, lr=0.001,
-              plot_progress=True, results_dir_path='.'):
+              plot_progress=True, results_dir_path='.', change_lr=False):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device used is: {device}")
@@ -111,6 +113,11 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
     test_loss_lst, test_acc_lst, train_loss_lst= [], [], []
     best_acc = 0
     for epoch in range(EPOCHS):
+
+        if change_lr and epoch >0 and epoch % 5 == 0:
+            for g in optimizer.param_groups:
+                g['lr'] *= 1e-1
+
         t0 = time.time()
         total_loss = 0
         num_words_in_batch = 0
@@ -219,12 +226,46 @@ def run_adv_model():
 
 def run_different_combos():
     WORD_EMBEDDING_DIM_OPTIONS = [50, 100, 200, 300]
-    TAG_EMBEDDING_DIM = [25, 50]
-    LSTM_HIDDEN_DIM = [60, 125, 250]
-    MLP_HIDDEN_DIM = [50, 100, 200]
-    BATCH_SIZE = [20, 40]
-    EPOCHS = 15
-    LR = 0.01
+    TAG_EMBEDDING_DIM_OPTIONS = [25, 50]
+    LSTM_HIDDEN_DIM_OPTIONS = [60, 125, 250]
+    MLP_HIDDEN_DIM_OPTIONS = [50, 100, 200]
+    BATCH_SIZE_OPTIONS = [20, 40]
+    EPOCHS_OPTIONS = [15, 30]
+    LR_OPTIONS = [0.01, 0.05]
+    change_lr_options = [True, False]
+
+    results_dict = {}
+    for combo in product(WORD_EMBEDDING_DIM_OPTIONS, TAG_EMBEDDING_DIM_OPTIONS, LSTM_HIDDEN_DIM_OPTIONS,
+                         MLP_HIDDEN_DIM_OPTIONS, BATCH_SIZE_OPTIONS, EPOCHS_OPTIONS, LR_OPTIONS, change_lr_options):
+
+        WORD_EMBEDDING_DIM, TAG_EMBEDDING_DIM, LSTM_HIDDEN_DIM, MLP_HIDDEN_DIM, BATCH_SIZE, EPOCHS, LR, CHANGE_LR =\
+            combo[0], combo[1], combo[2], combo[3], combo[4], combo[5], combo[6], combo[7]
+
+        paths_list = [path_train]
+        word_dict, pos_dict = dataset.get_vocabs(paths_list)
+        train_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'train', padding=False)
+        train_dataloader = DataLoader(train_dataset, shuffle=True)
+
+        test_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'test', padding=False)
+        test_dataloader = DataLoader(test_dataset, shuffle=False)
+
+        word_vocab_size = len(train_dataset.word_idx_mappings)
+        tag_vocab_size = len(train_dataset.pos_idx_mappings)
+
+        base_model = models.BasicDependencyParserModel(word_vocab_size, tag_vocab_size, WORD_EMBEDDING_DIM,
+                                                       TAG_EMBEDDING_DIM,
+                                                       hidden_dim=LSTM_HIDDEN_DIM, mlp_dim_out=MLP_HIDDEN_DIM)
+
+        res_dir = opj(net_results_dir, f"{combo}_adv_model_results" + time.strftime("%Y%m%d-%H%M%S"))
+
+        if not os.path.isdir(res_dir):
+            os.makedirs(res_dir)
+
+        results_dict[combo] = train_net(base_model, train_dataloader, test_dataloader, nll_loss_func, EPOCHS=EPOCHS, BATCH_SIZE=BATCH_SIZE,
+                  lr=LR, plot_progress=True, results_dir_path=res_dir)
+
+        with open(opj(net_results_dir, "final_combos_results.pkl"), 'wb'):
+            pickle.dump(results_dict, protocol=pickle.HIGHEST_PROTOCOL)
 
 ##################################################################################################################
 if __name__ == '__main__':
