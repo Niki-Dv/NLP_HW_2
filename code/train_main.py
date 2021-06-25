@@ -142,7 +142,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
 
         print(f"\nEpoch [{epoch + 1}/{EPOCHS}]. \t Test word avg loss: {test_loss:.{ROUND_NUM_DIGITS}f}"
               f" \t Test Accuracy: {test_acc:.{ROUND_NUM_DIGITS}f}."
-              f"\t Train sentence avg loss: {train_loss_lst[-1]):.{ROUND_NUM_DIGITS}f}"
+              f"\t Train sentence avg loss: {train_loss_lst[-1]:.{ROUND_NUM_DIGITS}f}"
               f"\t Time for epoch: {time.time()-t0}")
 
     plot_net_results([], train_loss_lst, epoch, results_dir_path, 'train_res_plots')
