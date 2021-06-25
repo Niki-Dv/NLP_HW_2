@@ -69,7 +69,7 @@ class AdvDependencyParserModel(nn.Module):
 
         super(AdvDependencyParserModel, self).__init__()
 
-        self.word_embedding = prep_word_embd
+        self.word_embedding = prep_word_embd.to(device)
         self.pos_embedding = nn.Embedding(pos_vocab_size, pos_emb_dim)
 
         self.lstm = nn.LSTM(input_size=(word_emb_dim+pos_emb_dim), hidden_size=hidden_dim, num_layers=lstm_layers,
@@ -81,7 +81,7 @@ class AdvDependencyParserModel(nn.Module):
 
     def forward(self, sentence):
         word_embed_idx, pos_embed_idx, headers, _ = sentence
-        word_embeds = self.word_embedding[word_embed_idx.to(device)] # [batch_size, seq_length, emb_dim]
+        word_embeds = self.word_embedding[word_embed_idx].to(device)# [batch_size, seq_length, emb_dim]
         pos_embeds = self.pos_embedding(pos_embed_idx.to(device))  # [batch_size, seq_length, emb_dim]
         embeds = torch.cat((word_embeds, pos_embeds), dim=2)  # [batch_size, seq_length, 2*emb_dim]
         lstm_out, _ = self.lstm(embeds.view(embeds.shape[1], 1, -1))  # [seq_length, batch_size, 2*hidden_dim]
