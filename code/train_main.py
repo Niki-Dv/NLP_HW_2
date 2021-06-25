@@ -127,7 +127,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
             headers = sentence[2].to(device)
             num_words_in_batch += sentence[3].item()
             scores = net(sentence)
-            loss = loss_func(scores, headers) * sentence[3]
+            loss = loss_func(scores, headers) * sentence[3].to(device)
             total_loss += loss.item()
             loss.backward()
 
