@@ -74,10 +74,16 @@ class AdvDependencyParserModel(nn.Module):
 
         self.lstm = nn.LSTM(input_size=(word_emb_dim+pos_emb_dim), hidden_size=hidden_dim, num_layers=lstm_layers,
                             bidirectional=True)
-        self.mlp_h = nn.Linear(hidden_dim*2, mlp_dim_out)
-        self.mlp_m = nn.Linear(hidden_dim*2, mlp_dim_out)
+        self.mlp_h = nn.Sequential(nn.Linear(hidden_dim*2, hidden_dim*4),
+                                   nn.Linear(hidden_dim*4, mlp_dim_out))
+
+        self.mlp_m = nn.Sequential(nn.Linear(hidden_dim*2, hidden_dim*4),
+                                   nn.Linear(hidden_dim*4, mlp_dim_out))
+
         self.activation = nn.Tanh()
-        self.mlp = nn.Linear(mlp_dim_out, 1)
+        self.mlp = nn.Sequential(nn.Linear(mlp_dim_out*2, mlp_dim_out*4),
+                                 nn.Linear(mlp_dim_out * 4, mlp_dim_out),
+                                 nn.Linear(mlp_dim_out, 1))
 
     def forward(self, sentence):
         word_embed_idx, pos_embed_idx, headers, _ = sentence

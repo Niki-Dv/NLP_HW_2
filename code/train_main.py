@@ -38,7 +38,7 @@ torch.manual_seed(1)
 import dataset, models
 
 ROUND_NUM_DIGITS = 4
-DEBUG = None
+DEBUG = 20
 ##################################################################################################################
 def plot_net_results(acc_list, loss_list, epoch, dir_save_path, prefix_str=""):
 
