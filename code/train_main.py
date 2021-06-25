@@ -38,7 +38,7 @@ torch.manual_seed(1)
 import dataset, models
 
 ROUND_NUM_DIGITS = 4
-DEBUG = None
+DEBUG = 10
 ##################################################################################################################
 def plot_net_results(acc_list, loss_list, epoch, dir_save_path, prefix_str=""):
     f = plt.figure()
@@ -127,7 +127,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
             headers = sentence[2].to(device)
             num_words_in_batch += sentence[3].item()
             scores = net(sentence)
-            loss = loss_func(scores, headers)
+            loss = loss_func(scores, headers) * sentence[3]
             total_loss += loss.item()
             loss.backward()
 
@@ -165,7 +165,7 @@ def run_base_model():
     TAG_EMBEDDING_DIM = 25
     LSTM_HIDDEN_DIM = 125
     MLP_HIDDEN_DIM = 100
-    BATCH_SIZE = 10
+    BATCH_SIZE = 50
     EPOCHS = 15
     LR = 0.01
 
