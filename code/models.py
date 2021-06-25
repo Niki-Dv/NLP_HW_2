@@ -69,7 +69,7 @@ class AdvDependencyParserModel(nn.Module):
 
         super(AdvDependencyParserModel, self).__init__()
 
-        self.word_embedding = prep_word_embd.to(device)
+        self.word_embedding = nn.Embedding.from_pretrained(prep_word_embd, freeze=True)
         self.pos_embedding = nn.Embedding(pos_vocab_size, pos_emb_dim)
 
         self.lstm = nn.LSTM(input_size=(word_emb_dim+pos_emb_dim), hidden_size=hidden_dim, num_layers=lstm_layers,

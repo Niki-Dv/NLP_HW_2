@@ -117,7 +117,8 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
     test_loss_lst, test_acc_lst, train_loss_lst= [], [], []
     best_acc = 0
     for epoch in range(EPOCHS):
-
+        if epoch == 5:
+            net.word_embedding.weight.requires_grad = True
         if change_lr and epoch >0 and epoch % 5 == 0:
             for g in optimizer.param_groups:
                 g['lr'] *= 1e-1
