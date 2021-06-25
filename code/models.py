@@ -81,8 +81,8 @@ class AdvDependencyParserModel(nn.Module):
                                    nn.Linear(hidden_dim*4, mlp_dim_out))
 
         self.activation = nn.Tanh()
-        self.mlp = nn.Sequential(nn.Linear(mlp_dim_out*2, mlp_dim_out*4),
-                                 nn.Linear(mlp_dim_out * 4, mlp_dim_out),
+        self.mlp = nn.Sequential(nn.Linear(mlp_dim_out, mlp_dim_out*2),
+                                 nn.Linear(mlp_dim_out * 2, mlp_dim_out),
                                  nn.Linear(mlp_dim_out, 1))
 
     def forward(self, sentence):
