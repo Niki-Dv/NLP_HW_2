@@ -38,7 +38,7 @@ torch.manual_seed(1)
 import dataset, models
 
 ROUND_NUM_DIGITS = 4
-DEBUG = None
+DEBUG = 10
 ##################################################################################################################
 def plot_net_results(acc_list, loss_list, epoch, dir_save_path, prefix_str=""):
     f = plt.figure()
@@ -101,7 +101,7 @@ def predict(net, device, loader, loss_func):
     return acc / num_of_edges, loss / len(loader)
 ##################################################################################################################
 def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCHS = 15, BATCH_SIZE = 1, lr=0.001,
-              plot_progress=True, results_dir_path='.', change_lr=False):
+              plot_progress=True, results_dir_path='.', change_lr=False, consider_sentence_len=False):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device used is: {device}")
@@ -127,7 +127,11 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
             headers = sentence[2].to(device)
             num_words_in_batch += sentence[3].item()
             scores = net(sentence)
-            loss = loss_func(scores, headers) * sentence[3].to(device)
+            loss = loss_func(scores, headers)
+
+            if consider_sentence_len:
+                loss *= sentence[3].to(device)
+
             total_loss += loss.item()
             loss.backward()
 
@@ -213,8 +217,8 @@ def run_adv_model():
     tag_vocab_size = len(train_dataset.pos_idx_mappings)
 
     base_model = models.BasicDependencyParserModel(word_vocab_size, tag_vocab_size, WORD_EMBEDDING_DIM,
-                                                   TAG_EMBEDDING_DIM,
-                                                   hidden_dim=LSTM_HIDDEN_DIM, mlp_dim_out=MLP_HIDDEN_DIM)
+                                                   TAG_EMBEDDING_DIM, hidden_dim=LSTM_HIDDEN_DIM,
+                                                   mlp_dim_out=MLP_HIDDEN_DIM)
 
     res_dir = opj(net_results_dir, "adv_model_results" + time.strftime("%Y%m%d-%H%M%S"))
 
@@ -222,7 +226,7 @@ def run_adv_model():
         os.makedirs(res_dir)
 
     train_net(base_model, train_dataloader, test_dataloader, nll_loss_func, EPOCHS=EPOCHS, BATCH_SIZE=BATCH_SIZE, lr=LR,
-              plot_progress=True, results_dir_path=res_dir)
+              plot_progress=True, results_dir_path=res_dir, change_lr=True, consider_sentence_len=True)
 
 def run_different_combos():
     WORD_EMBEDDING_DIM_OPTIONS = [50, 100, 200, 300]
@@ -237,7 +241,7 @@ def run_different_combos():
     results_dict = {}
     for combo in product(WORD_EMBEDDING_DIM_OPTIONS, TAG_EMBEDDING_DIM_OPTIONS, LSTM_HIDDEN_DIM_OPTIONS,
                          MLP_HIDDEN_DIM_OPTIONS, BATCH_SIZE_OPTIONS, EPOCHS_OPTIONS, LR_OPTIONS, change_lr_options):
-
+        print(f"Running combo: {combo}")
         WORD_EMBEDDING_DIM, TAG_EMBEDDING_DIM, LSTM_HIDDEN_DIM, MLP_HIDDEN_DIM, BATCH_SIZE, EPOCHS, LR, CHANGE_LR =\
             combo[0], combo[1], combo[2], combo[3], combo[4], combo[5], combo[6], combo[7]
 
@@ -262,7 +266,7 @@ def run_different_combos():
             os.makedirs(res_dir)
 
         results_dict[combo] = train_net(base_model, train_dataloader, test_dataloader, nll_loss_func, EPOCHS=EPOCHS, BATCH_SIZE=BATCH_SIZE,
-                  lr=LR, plot_progress=True, results_dir_path=res_dir)
+                  lr=LR, plot_progress=True, results_dir_path=res_dir, change_lr=CHANGE_LR, consider_sentence_len=True)
 
         with open(opj(net_results_dir, "final_combos_results.pkl"), 'wb'):
             pickle.dump(results_dict, protocol=pickle.HIGHEST_PROTOCOL)
@@ -270,7 +274,7 @@ def run_different_combos():
 ##################################################################################################################
 if __name__ == '__main__':
     run_base_model()
-    #run_adv_model()
+    run_different_combos()
 
 
 
