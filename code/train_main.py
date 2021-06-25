@@ -96,7 +96,7 @@ def predict(net, device, loader, loss_func):
         num_of_edges += predictions.size
 
     net.train()
-    return acc / num_of_edges, loss / num_of_edges
+    return acc / num_of_edges, loss / len(loader)
 ##################################################################################################################
 def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCHS = 15, BATCH_SIZE = 1, lr=0.001,
               plot_progress=True, results_dir_path='.'):
@@ -112,8 +112,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
     best_acc = 0
     for epoch in range(EPOCHS):
         t0 = time.time()
-        total_epoch_loss = 0
-        EPOCH_LOSSES = []
+        total_loss = 0
         num_words_in_batch = 0
         for i, sentence in enumerate(tqdm(train_dataloader)):
             if DEBUG is not None and i == DEBUG:
@@ -122,17 +121,16 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
             num_words_in_batch += sentence[3].item()
             scores = net(sentence)
             loss = loss_func(scores, headers)
-            total_epoch_loss += loss.item()
+            total_loss += loss.item()
             loss.backward()
 
             if i % BATCH_SIZE == 0 and i > 0:
-                EPOCH_LOSSES.append(total_epoch_loss/num_words_in_batch)
                 total_epoch_loss = 0
                 num_words_in_batch = 0
                 optimizer.step()
                 net.zero_grad()
 
-        train_loss_lst.append(np.average(EPOCH_LOSSES))
+        train_loss_lst.append(total_loss/len(train_dataloader))
         test_acc, test_loss = predict(net, device, test_dataloader, loss_func)
         test_loss_lst.append(test_loss)
         test_acc_lst.append(test_acc)
@@ -144,7 +142,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
 
         print(f"\nEpoch [{epoch + 1}/{EPOCHS}]. \t Test word avg loss: {test_loss:.{ROUND_NUM_DIGITS}f}"
               f" \t Test Accuracy: {test_acc:.{ROUND_NUM_DIGITS}f}."
-              f"\t Train sentence avg loss: {np.average(train_loss_lst):.{ROUND_NUM_DIGITS}f}"
+              f"\t Train sentence avg loss: {train_loss_lst[-1]):.{ROUND_NUM_DIGITS}f}"
               f"\t Time for epoch: {time.time()-t0}")
 
     plot_net_results([], train_loss_lst, epoch, results_dir_path, 'train_res_plots')

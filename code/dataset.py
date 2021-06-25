@@ -116,7 +116,7 @@ class PosDataReader:
 
 class PosDataset(Dataset):
     def __init__(self, word_dict, pos_dict, dir_path: str, subset: str,
-                 padding=False, word_embeddings=None, alpha_dropout=0.4):
+                 padding=False, word_embeddings=None, alpha_dropout=0.3):
         """
         :param word_dict:
         :param pos_dict:
