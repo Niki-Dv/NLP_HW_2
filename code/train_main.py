@@ -36,7 +36,7 @@ torch.manual_seed(1)
 import dataset, models
 
 
-DEBUG = 100
+DEBUG = None
 
 def plot_net_results(acc_list, loss_list, epoch, dir_save_path, prefix_str=""):
     f = plt.figure()
