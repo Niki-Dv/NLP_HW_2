@@ -38,7 +38,7 @@ torch.manual_seed(1)
 import dataset, models
 
 ROUND_NUM_DIGITS = 4
-DEBUG = 10
+DEBUG = None
 ##################################################################################################################
 def plot_net_results(acc_list, loss_list, epoch, dir_save_path, prefix_str=""):
 
@@ -201,7 +201,7 @@ def run_base_model():
 
 ##################################################################################################################
 def run_adv_model():
-    WORD_EMBEDDING_DIM = 100
+    WORD_EMBEDDING_DIM = 300
     TAG_EMBEDDING_DIM = 25
     LSTM_HIDDEN_DIM = 125
     MLP_HIDDEN_DIM = 100
@@ -214,17 +214,18 @@ def run_adv_model():
     train_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'train', padding=False)
     train_dataloader = DataLoader(train_dataset, shuffle=True)
 
-    test_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'test', padding=False)
+    test_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'test', padding=False,
+                                      WORD_EMBD_DIM=WORD_EMBEDDING_DIM)
     test_dataloader = DataLoader(test_dataset, shuffle=False)
 
     word_vocab_size = len(train_dataset.word_idx_mappings)
     tag_vocab_size = len(train_dataset.pos_idx_mappings)
 
-    base_model = models.BasicDependencyParserModel(word_vocab_size, tag_vocab_size, WORD_EMBEDDING_DIM,
+    base_model = models.AdvDependencyParserModel(train_dataset.word_vectors, tag_vocab_size, WORD_EMBEDDING_DIM,
                                                    TAG_EMBEDDING_DIM, hidden_dim=LSTM_HIDDEN_DIM,
                                                    mlp_dim_out=MLP_HIDDEN_DIM)
 
-    res_dir = opj(net_results_dir, "adv_model_results" + time.strftime("%Y%m%d-%H%M%S"))
+    res_dir = opj(net_results_dir, "base_with_prep_emb_model_results" + time.strftime("%Y%m%d-%H%M%S"))
 
     if not os.path.isdir(res_dir):
         os.makedirs(res_dir)
@@ -278,7 +279,8 @@ def run_different_combos():
 ##################################################################################################################
 if __name__ == '__main__':
     #run_base_model()
-    run_different_combos()
+    run_adv_model()
+    #run_different_combos()
 
 
 

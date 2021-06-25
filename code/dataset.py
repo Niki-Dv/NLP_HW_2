@@ -116,7 +116,7 @@ class PosDataReader:
 
 class PosDataset(Dataset):
     def __init__(self, word_dict, pos_dict, dir_path: str, subset: str,
-                 padding=False, word_embeddings=None, alpha_dropout=0.25):
+                 padding=False, word_embeddings=None, alpha_dropout=0.25, WORD_EMBD_DIM=300):
         """
         :param word_dict:
         :param pos_dict:
@@ -142,7 +142,7 @@ class PosDataset(Dataset):
             self.word_idx_mappings, self.idx_word_mappings, self.word_vectors = word_embeddings
         else:
             self.word_idx_mappings, self.idx_word_mappings, self.word_vectors =\
-                self.init_word_embeddings(self.datareader.word_dict)
+                self.init_word_embeddings(self.datareader.word_dict, WORD_EMBD_DIM)
 
         self.pos_idx_mappings, self.idx_pos_mappings = self.init_pos_vocab(self.datareader.pos_dict)
 
@@ -161,8 +161,8 @@ class PosDataset(Dataset):
         return word_embed_idx, pos_embed_idx, head_idx, sentence_len
 
     @staticmethod
-    def init_word_embeddings(word_dict):
-        glove = Vocab(Counter(word_dict), vectors="glove.6B.300d", specials=SPECIAL_TOKENS)
+    def init_word_embeddings(word_dict, WORD_EMBD_DIM):
+        glove = Vocab(Counter(word_dict), vectors=f"glove.6B.{WORD_EMBD_DIM}d", specials=SPECIAL_TOKENS)
         return glove.stoi, glove.itos, glove.vectors
 
     def get_word_embeddings(self):
