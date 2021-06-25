@@ -36,7 +36,7 @@ torch.manual_seed(1)
 import dataset, models
 
 
-DEBUG = None
+DEBUG = 100
 
 def plot_net_results(acc_list, loss_list, epoch, dir_save_path, prefix_str=""):
     f = plt.figure()
@@ -94,7 +94,8 @@ def predict(net, device, loader, loss_func):
         acc += np.sum(headers == predictions)
         num_of_edges += predictions.size
     net.train()
-    return acc / num_of_edges, loss
+
+    return acc / num_of_edges, loss/len(loader)
 
 def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCHS = 15, BATCH_SIZE = 1, lr=0.001,
               plot_progress=True, results_dir_path='.'):
@@ -107,7 +108,6 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
     print("Training Started")
     test_loss_lst, test_acc_lst, train_loss_lst= [], [], []
     best_acc = 0
-
     for epoch in range(EPOCHS):
         t0 = time.time()
         NUM_WORDS_BATCH = 0
@@ -137,15 +137,16 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
             net.save(save_path)
             best_acc = test_acc
 
-        print(f"Epoch [{epoch + 1}/{EPOCHS}]. \t Test Loss: {test_loss:.2f}"
+        print(f"Epoch [{epoch + 1}/{EPOCHS}]. \t Test word avg loss: {test_loss:.2f}"
               f" \t Test Accuracy: {test_acc:.2f}."
-              f"Train average Loss: {np.average(train_loss_lst):.2f}"
+              f"Train word avg loss: {np.average(train_loss_lst):.2f}"
               f" Time for epoch: {time.time()-t0}")
 
+    plot_net_results([], train_loss_lst, epoch, results_dir_path, 'train_res_plots')
     plot_net_results(test_acc_lst, test_loss_lst, epoch, results_dir_path, 'test_res_plots')
 
     if plot_progress:
-        plot_net_results([], train_loss_lst, epoch, results_dir_path, 'train_res_plots.png')
+        plot_net_results([], train_loss_lst, epoch, results_dir_path, 'train_res_plots')
 
 ##################################################################################################################
 if __name__ == '__main__':
