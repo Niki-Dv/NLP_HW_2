@@ -41,6 +41,7 @@ ROUND_NUM_DIGITS = 4
 DEBUG = 10
 ##################################################################################################################
 def plot_net_results(acc_list, loss_list, epoch, dir_save_path, prefix_str=""):
+
     f = plt.figure()
     axes = f.add_subplot(111)
     axes.plot(list(range(1, 1 + len(loss_list))), loss_list, color='red', label='loss')
@@ -55,7 +56,10 @@ def plot_net_results(acc_list, loss_list, epoch, dir_save_path, prefix_str=""):
 
     f.tight_layout()
     f.suptitle(f'Results summary for epoch: {epoch} ')
-    f.savefig(opj(dir_save_path, prefix_str + f"final acc_{round(acc_list[-1],3)}_prog_plot_epoch {epoch}"))
+    if len(acc_list) != 0:
+        f.savefig(opj(dir_save_path, prefix_str + f"final acc_{round(acc_list[-1],3)}_prog_plot_epoch {epoch}"))
+    else:
+        f.savefig(opj(dir_save_path, prefix_str + f"final acc_{round(loss_list[-1], 3)}_prog_plot_epoch {epoch}"))
     plt.close('all')
 
 ##################################################################################################################
@@ -160,7 +164,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
     plot_net_results(test_acc_lst, test_loss_lst, epoch, results_dir_path, 'test_res_plots')
 
     if plot_progress:
-        plot_net_results([], train_loss_lst, epoch, results_dir_path, 'train_res_plots')
+        plot_net_results([], train_loss_lst, epoch, results_dir_path, 'train_   res_plots')
 
     return np.max(test_acc_lst)
 ##################################################################################################################
