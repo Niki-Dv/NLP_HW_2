@@ -233,12 +233,12 @@ def run_adv_model():
               plot_progress=True, results_dir_path=res_dir, change_lr=True, consider_sentence_len=True)
 
 def run_different_combos():
-    WORD_EMBEDDING_DIM_OPTIONS = [50, 100, 200, 300]
+    WORD_EMBEDDING_DIM_OPTIONS = [50, 100, 200]
     TAG_EMBEDDING_DIM_OPTIONS = [25, 50]
     LSTM_HIDDEN_DIM_OPTIONS = [60, 125, 250]
     MLP_HIDDEN_DIM_OPTIONS = [50, 100, 200]
-    BATCH_SIZE_OPTIONS = [20, 40]
-    EPOCHS_OPTIONS = [15, 30]
+    BATCH_SIZE_OPTIONS = [40]
+    EPOCHS_OPTIONS = [15]
     LR_OPTIONS = [0.01, 0.05]
     change_lr_options = [True, False]
 
@@ -272,8 +272,8 @@ def run_different_combos():
         results_dict[combo] = train_net(base_model, train_dataloader, test_dataloader, nll_loss_func, EPOCHS=EPOCHS, BATCH_SIZE=BATCH_SIZE,
                   lr=LR, plot_progress=True, results_dir_path=res_dir, change_lr=CHANGE_LR, consider_sentence_len=True)
 
-        with open(opj(net_results_dir, "final_combos_results.pkl"), 'wb'):
-            pickle.dump(results_dict, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(opj(net_results_dir, "final_combos_results.pkl"), 'wb') as f:
+            pickle.dump(results_dict, f,  protocol=pickle.HIGHEST_PROTOCOL)
 
 ##################################################################################################################
 if __name__ == '__main__':
