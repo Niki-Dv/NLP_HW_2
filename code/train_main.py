@@ -134,7 +134,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
             loss = loss_func(scores, headers)
 
             if consider_sentence_len:
-                loss *= sentence[3].to(device)
+                loss *= sentence[3].to(device).item()
 
             total_loss += loss.item()
             loss.backward()
@@ -277,7 +277,7 @@ def run_different_combos():
 
 ##################################################################################################################
 if __name__ == '__main__':
-    run_base_model()
+    #run_base_model()
     run_different_combos()
 
 
