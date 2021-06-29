@@ -86,7 +86,7 @@ class PosDataReader:
 
     def __readData__(self):
         """main reader function which also populates the class data structures"""
-        cur_sentence = []
+        cur_sentence = [(ROOT_TOKEN, ROOT_TOKEN, -1)]
         with open(self.file, 'r') as f:
             for line in f:
                 if line == "\n":
