@@ -33,7 +33,8 @@ data_dir = opj(curr_dir, '../data')
 net_results_dir = opj(curr_dir, '../net_results')
 path_train = opj(data_dir, "train.labeled")
 path_test = opj(data_dir, "test.labeled")
-
+path_test = opj(data_dir, "test.labeled")
+path_comp = opj(data_dir, "comp.unlabeled")
 torch.manual_seed(1)
 import dataset, models
 
@@ -201,18 +202,52 @@ def run_base_model():
               plot_progress=True, results_dir_path=res_dir)
 
 ##################################################################################################################
+def score_to_mst(scores):
+    score_matrix = scores.cpu().detach().numpy()
+    score_matrix[:, 0] = float("-inf")
+    mst, _ = decode_mst(score_matrix, len(score_matrix), has_labels=False)
+    return mst
+
+
+def predict_from_loader(net, loader):
+    #doesn't work with batchs only single sentence 
+    net.eval()
+    predictions = []
+    for i, sentence in enumerate(loader):
+        scores = net(sentence)
+        prediction = score_to_mst(scores[0,...])[1:]
+        predictions.append(prediction)
+    return predictions
+
+def write_comp(path_file_r,path_file_w,predictions):
+    sentence_index, word_index = 0, 0
+    with open(path_file_r, 'r') as r_file:
+        with open(path_file_w, 'w+') as w_file:
+            for line in r_file:
+                if line == '\n':
+                    sentence_index += 1
+                    word_index = 0
+                    w_file.write(line)
+                    continue
+                splitted_line = line.split('\t')
+                splitted_line[6] = str(predictions[sentence_index][word_index])
+                line = '\t'.join(splitted_line)
+                w_file.write(line)
+                word_index += 1
+
+##################################################################################################################
 def run_adv_model():
-    WORD_EMBEDDING_DIM = 300
-    TAG_EMBEDDING_DIM = 25
+    WORD_EMBEDDING_DIM = 50
+    TAG_EMBEDDING_DIM = 50
     LSTM_HIDDEN_DIM = 125
-    MLP_HIDDEN_DIM = 100
+    MLP_HIDDEN_DIM = 200
     BATCH_SIZE = 40
-    EPOCHS = 15
+    EPOCHS = 40
     LR = 0.01
 
     paths_list = [path_train]
     word_dict, pos_dict = dataset.get_vocabs(paths_list)
-    train_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'train', padding=False)
+    train_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'train', padding=False,WORD_EMBD_DIM=WORD_EMBEDDING_DIM)
     train_dataloader = DataLoader(train_dataset, shuffle=True)
 
     test_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'test', padding=False,
@@ -277,12 +312,29 @@ def run_different_combos():
         with open(opj(net_results_dir, "final_combos_results.pkl"), 'wb') as f:
             pickle.dump(results_dict, f,  protocol=pickle.HIGHEST_PROTOCOL)
 
+
 ##################################################################################################################
 if __name__ == '__main__':
     #run_base_model()
-    run_adv_model()
+    #run_adv_model()
     #run_different_combos()
+    NET_PATH="/home/student/NLP_HW_2/net_results/(50, 50, 125, 200, 40, 15, 0.01, True)_adv_model_results20210625-221347/_epoch_7_acc_0.8971.pt"
+    WORD_EMBEDDING_DIM = 50
+    TAG_EMBEDDING_DIM = 50
+    LSTM_HIDDEN_DIM = 125
+    MLP_HIDDEN_DIM = 200
+    BATCH_SIZE = 40
+    EPOCHS = 40
+    LR = 0.01
+    paths_list = [path_train]
+    word_dict, pos_dict = dataset.get_vocabs(paths_list)
+    comp_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'comp', padding=False,
+                                      WORD_EMBD_DIM=WORD_EMBEDDING_DIM)
+    comp_dataloader = DataLoader(comp_dataset, shuffle=False)
 
+    model = models.AdvDependencyParserModel.load(NET_PATH)
+    p=predict_from_loader(model,comp_dataloader)
+    write_comp(path_comp,opj(data_dir,'comp.labeled'),p)
 
 
 

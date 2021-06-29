@@ -99,12 +99,13 @@ class PosDataReader:
 
                 while '' in splited_words:
                     splited_words.remove('')
-                del splited_words[-1]
 
                 word = splited_words[1].lower()
                 pos_tag = splited_words[2]
-                head_idx = int(splited_words[3])
-
+                if (len(splited_words)>=4):
+                    head_idx = int(splited_words[3])
+                else:
+                    head_idx = -1
                 cur_sentence.append((word, pos_tag, head_idx))
 
     def get_num_sentences(self):
@@ -128,11 +129,13 @@ class PosDataset(Dataset):
         super().__init__()
 
         self.alpha_dropout = alpha_dropout
-
-        assert subset in ['train', 'test']
+        t='labeled'
+        assert subset in ['train', 'test','comp']
+        if subset =='comp':
+            t='un'+t
         self.subset = subset
 
-        self.file = opj(dir_path, subset + ".labeled")
+        self.file = opj(dir_path, subset + "."+t)
 
         self.datareader = PosDataReader(self.file, word_dict, pos_dict)
 
