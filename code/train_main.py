@@ -54,9 +54,8 @@ def plot_net_results(acc_list, loss_list, epoch, dir_save_path, prefix_str=""):
         axes.set_ylabel('UAS')
         axes.tick_params(axis='y')
         axes.legend()
-
+    axes.set_title(f'Results summary for epoch: {epoch} ')
     f.tight_layout()
-    f.suptitle(f'Results summary for epoch: {epoch} ')
     if len(acc_list) != 0:
         f.savefig(opj(dir_save_path, prefix_str + f"final acc_{round(acc_list[-1],3)}_prog_plot_epoch {epoch}.png"))
     else:
@@ -139,14 +138,13 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
                 loss *= sentence[3].to(device).item()
 
             total_loss += loss.item()
+            loss= loss/BATCH_SIZE
             loss.backward()
 
             if i % BATCH_SIZE == 0 and i > 0:
-                total_epoch_loss = 0
                 num_words_in_batch = 0
                 optimizer.step()
                 net.zero_grad()
-
         train_loss_lst.append(total_loss/len(train_dataloader))
         test_acc, test_loss = predict(net, device, test_dataloader, loss_func)
         test_loss_lst.append(test_loss)
@@ -157,12 +155,11 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
             net.save(save_path)
             best_acc = test_acc
 
-        print(f"\nEpoch [{epoch + 1}/{EPOCHS}]. \t Test word avg loss: {test_loss:.{ROUND_NUM_DIGITS}f}"
-              f" \t Test Accuracy: {test_acc:.{ROUND_NUM_DIGITS}f}."
+        print(f"\nEpoch [{epoch + 1}/{EPOCHS}]. \t Test sentence avg loss: {test_loss:.{ROUND_NUM_DIGITS}f}"
+              f" \t Test Accuracy: {test_acc:.{ROUND_NUM_DIGITS}f}"
               f"\t Train sentence avg loss: {train_loss_lst[-1]:.{ROUND_NUM_DIGITS}f}"
               f"\t Time for epoch: {time.time()-t0}")
 
-    plot_net_results([], train_loss_lst, epoch, results_dir_path, 'train_res_plots')
     plot_net_results(test_acc_lst, test_loss_lst, epoch, results_dir_path, 'test_res_plots')
 
     if plot_progress:
@@ -237,15 +234,16 @@ def write_comp(path_file_r,path_file_w,predictions):
 
 ##################################################################################################################
 def run_adv_model():
-    WORD_EMBEDDING_DIM = 100
-    TAG_EMBEDDING_DIM = 25
+    WORD_EMBEDDING_DIM = 50
+    TAG_EMBEDDING_DIM = 50
     LSTM_HIDDEN_DIM = 125
-    MLP_HIDDEN_DIM = 100
+    MLP_HIDDEN_DIM = 200
     BATCH_SIZE = 40
     EPOCHS = 15
     LR = 0.01
+    CHANGE_LR=True
 
-    paths_list = [path_train]
+    paths_list = [path_train,path_comp,path_test]
     word_dict, pos_dict = dataset.get_vocabs(paths_list)
     train_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'train', padding=False,
                                        WORD_EMBD_DIM=WORD_EMBEDDING_DIM)
@@ -268,7 +266,7 @@ def run_adv_model():
         os.makedirs(res_dir)
 
     train_net(base_model, train_dataloader, test_dataloader, nll_loss_func, EPOCHS=EPOCHS, BATCH_SIZE=BATCH_SIZE, lr=LR,
-              plot_progress=True, results_dir_path=res_dir, change_lr=True, consider_sentence_len=True)
+              plot_progress=True, results_dir_path=res_dir, change_lr=CHANGE_LR, consider_sentence_len=True)
 
 def run_different_combos():
     WORD_EMBEDDING_DIM_OPTIONS = [50, 100, 200]
@@ -328,8 +326,8 @@ def tag_comp_file(NET_PATH):
 
 ##################################################################################################################
 if __name__ == '__main__':
-    run_base_model()
-    #run_adv_model()
+    #run_base_model()
+    run_adv_model()
     #run_different_combos()
     #NET_PATH = "/home/student/NLP_HW_2/net_results/(50, 50, 125, 200, 40, 15, 0.01, True)_adv_model_results20210625-221347/_epoch_7_acc_0.8971.pt"
     #tag_comp_file(NET_PATH)
