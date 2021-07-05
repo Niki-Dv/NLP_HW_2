@@ -247,7 +247,7 @@ def write_comp(path_file_r,path_file_w,predictions):
 
 ##################################################################################################################
 def run_adv_model():
-    WORD_EMBEDDING_DIM = 80
+    WORD_EMBEDDING_DIM = 100
     TAG_EMBEDDING_DIM = 40
     LSTM_HIDDEN_DIM = 125
     MLP_HIDDEN_DIM = 100
@@ -351,7 +351,7 @@ def tag_comp_file(NET_PATH, tag_file_path, file_prefix="", model_type=0):
 
 ##################################################################################################################
 if __name__ == '__main__':
-    run_base_model()
+    #run_base_model()
     run_adv_model()
     #run_different_combos()
     #NET_PATH_base = r"/home/student/NLP_HW_2/submission/_epoch_6_acc_0.8852.pt"
