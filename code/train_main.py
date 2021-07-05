@@ -33,6 +33,7 @@ data_dir = opj(curr_dir, '../data')
 net_results_dir = opj(curr_dir, '../net_results')
 path_train = opj(data_dir, "train.labeled")
 path_test = opj(data_dir, "test.labeled")
+path_comp = opj(data_dir, "comp.unlabeled")
 
 torch.manual_seed(1)
 import dataset, models
@@ -202,7 +203,7 @@ def run_base_model():
 
 ##################################################################################################################
 def run_adv_model():
-    WORD_EMBEDDING_DIM = 300
+    WORD_EMBEDDING_DIM = 100
     TAG_EMBEDDING_DIM = 25
     LSTM_HIDDEN_DIM = 125
     MLP_HIDDEN_DIM = 100
@@ -212,7 +213,8 @@ def run_adv_model():
 
     paths_list = [path_train]
     word_dict, pos_dict = dataset.get_vocabs(paths_list)
-    train_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'train', padding=False)
+    train_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'train', padding=False,
+                                       WORD_EMBD_DIM=WORD_EMBEDDING_DIM)
     train_dataloader = DataLoader(train_dataset, shuffle=True)
 
     test_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'test', padding=False,
@@ -277,11 +279,13 @@ def run_different_combos():
         with open(opj(net_results_dir, "final_combos_results.pkl"), 'wb') as f:
             pickle.dump(results_dict, f,  protocol=pickle.HIGHEST_PROTOCOL)
 
+
 ##################################################################################################################
 if __name__ == '__main__':
     #run_base_model()
     run_adv_model()
     #run_different_combos()
+
 
 
 

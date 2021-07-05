@@ -66,7 +66,6 @@ def get_vocabs(list_of_paths):
                 while '' in splited_words:
                     splited_words.remove('')
 
-                del splited_words[-1]
                 word = splited_words[1].lower()
                 pos_tag = splited_words[2]
 
