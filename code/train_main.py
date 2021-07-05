@@ -258,7 +258,7 @@ def run_adv_model():
     word_vocab_size = len(train_dataset.word_idx_mappings)
     tag_vocab_size = len(train_dataset.pos_idx_mappings)
 
-    base_model = models.BasicDependencyParserModel(train_dataset.word_vectors, tag_vocab_size, WORD_EMBEDDING_DIM,
+    base_model = models.AdvDependencyParserModel(train_dataset.word_vectors, tag_vocab_size, WORD_EMBEDDING_DIM,
                                                    TAG_EMBEDDING_DIM, hidden_dim=LSTM_HIDDEN_DIM,
                                                    mlp_dim_out=MLP_HIDDEN_DIM)
 
@@ -338,7 +338,7 @@ def tag_comp_file(NET_PATH, tag_file_path, file_prefix="", model_type=0):
 
 ##################################################################################################################
 if __name__ == '__main__':
-    run_base_model()
+    #run_base_model()
     run_adv_model()
     #run_different_combos()
     #NET_PATH_base = r"/home/student/NLP_HW_2/submission/_epoch_6_acc_0.8852.pt"

@@ -141,11 +141,7 @@ class AdvDependencyParserModel(nn.Module):
         self.mlp_m = nn.Linear(hidden_dim * 2, mlp_dim_out)
 
         self.activation = nn.Tanh()
-        self.mlp = nn.Sequential(nn.Linear(mlp_dim_out, mlp_dim_out*2),
-                                 nn.ReLU(),
-                                 nn.Linear(mlp_dim_out * 2, mlp_dim_out),
-                                 nn.ReLU(),
-                                 nn.Linear(mlp_dim_out, 1))
+        self.mlp = nn.Linear(mlp_dim_out, 1)
 
     def forward(self, sentence):
         word_embed_idx, pos_embed_idx, headers, _ = sentence
