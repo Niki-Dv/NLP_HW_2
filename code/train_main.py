@@ -312,7 +312,7 @@ def run_different_combos():
             pickle.dump(results_dict, f,  protocol=pickle.HIGHEST_PROTOCOL)
 
 ##################################################################################################################
-def tag_comp_file(NET_PATH):
+def tag_comp_file(NET_PATH, file_prefix=""):
     WORD_EMBEDDING_DIM = 50
     paths_list = [path_train]
     word_dict, pos_dict = dataset.get_vocabs(paths_list)
@@ -322,15 +322,17 @@ def tag_comp_file(NET_PATH):
 
     model = models.AdvDependencyParserModel.load(NET_PATH)
     p = predict_from_loader(model, comp_dataloader)
-    write_comp(path_comp, opj(data_dir, 'comp.labeled'), p)
+    write_comp(path_comp, opj(data_dir, file_prefix + 'comp.labeled'), p)
 
 ##################################################################################################################
 if __name__ == '__main__':
     #run_base_model()
-    run_adv_model()
+    #run_adv_model()
     #run_different_combos()
-    #NET_PATH = "/home/student/NLP_HW_2/net_results/(50, 50, 125, 200, 40, 15, 0.01, True)_adv_model_results20210625-221347/_epoch_7_acc_0.8971.pt"
-    #tag_comp_file(NET_PATH)
+    NET_PATH_base = r"C:\Users\nikid\OneDrive\Desktop\submission\_epoch_6_acc_0.8852.pt"
+    NET_PATH_adv = r"C:\Users\nikid\OneDrive\Desktop\submission\_epoch_6_acc_0.9042.pt"
+    tag_comp_file(NET_PATH_base, "m1")
+    tag_comp_file(NET_PATH_adv, "m2")
 
 
 
