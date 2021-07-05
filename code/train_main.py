@@ -331,11 +331,13 @@ def tag_comp_file(NET_PATH, tag_file_path, file_prefix="", model_type=0):
     """
     model_type: 0 - base model (word emb' trained only on words from train dataset), 1 - advanced model (word emb' trained on all the words)
     """
-    WORD_EMBEDDING_DIM = 50
+    WORD_EMBEDDING_DIM = 100
     if model_type == 0:
       paths_list = [path_train]
+      model = models.BasicDependencyParserModel.load(NET_PATH)
     elif model_type == 1:
       paths_list = [path_train, path_test, path_comp]
+      model = models.AdvDependencyParserModel.load(NET_PATH)
     else:
       raise Exception("Unknown model type")
       
@@ -345,19 +347,18 @@ def tag_comp_file(NET_PATH, tag_file_path, file_prefix="", model_type=0):
                                       
     comp_dataloader = DataLoader(comp_dataset, shuffle=False)
 
-    model = models.AdvDependencyParserModel.load(NET_PATH)
     p = predict_from_loader(model, comp_dataloader)
     write_comp(tag_file_path, opj(data_dir, file_prefix + '.labeled'), p)
 
 ##################################################################################################################
 if __name__ == '__main__':
     #run_base_model()
-    run_adv_model()
+    #run_adv_model()
     #run_different_combos()
-    #NET_PATH_base = r"/home/student/NLP_HW_2/submission/_epoch_6_acc_0.8852.pt"
-    #NET_PATH_adv = r"/home/student/NLP_HW_2/submission/_epoch_6_acc_0.9042.pt"
-    #tag_comp_file(NET_PATH_base, path_comp, "comp_m1_312088727", model_type=0)
-    #tag_comp_file(NET_PATH_adv, path_comp, "comp_m2_312088727", model_type=1)
+    NET_PATH_base = r"/home/student/NLP_HW_2/submission/base_epoch_9_acc_0.8797.pt"
+    NET_PATH_adv = r"/home/student/NLP_HW_2/submission/adv_epoch_6_acc_0.9013.pt"
+    tag_comp_file(NET_PATH_base, path_comp, "comp_m1_312088727", model_type=0)
+    tag_comp_file(NET_PATH_adv, path_comp, "comp_m2_312088727", model_type=1)
 
 
 
