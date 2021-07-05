@@ -329,11 +329,10 @@ def tag_comp_file(NET_PATH):
 ##################################################################################################################
 if __name__ == '__main__':
     run_base_model()
-    #run_adv_model()
-    #run_different_combos()
+    run_adv_model()
+    run_different_combos()
     #NET_PATH = "/home/student/NLP_HW_2/net_results/(50, 50, 125, 200, 40, 15, 0.01, True)_adv_model_results20210625-221347/_epoch_7_acc_0.8971.pt"
     #tag_comp_file(NET_PATH)
-
 
 
 
