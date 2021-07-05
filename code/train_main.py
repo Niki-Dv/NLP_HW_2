@@ -181,7 +181,12 @@ def run_base_model():
     train_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'train', padding=False)
     train_dataloader = DataLoader(train_dataset, shuffle=True)
 
+<<<<<<< HEAD
     test_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'test', padding=False, alpha_dropout=0.0)
+=======
+    test_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'test', padding=False, word_embeddings=None,
+                                      alpha_dropout=0.0)
+>>>>>>> 2e70e3a20db67af39e961ec298f1b019056b4e91
     test_dataloader = DataLoader(test_dataset, shuffle=False)
 
     word_vocab_size = len(train_dataset.word_idx_mappings)
@@ -239,7 +244,7 @@ def run_adv_model():
     LSTM_HIDDEN_DIM = 125
     MLP_HIDDEN_DIM = 200
     BATCH_SIZE = 40
-    EPOCHS = 15
+    EPOCHS = 30
     LR = 0.01
     CHANGE_LR=True
 
@@ -249,7 +254,8 @@ def run_adv_model():
                                        alpha_dropout=0.0, WORD_EMBD_DIM=WORD_EMBEDDING_DIM)
     train_dataloader = DataLoader(train_dataset, shuffle=True)
 
-    test_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'test', padding=False,
+    word_embd = train_dataset.word_idx_mappings, train_dataset.idx_word_mappings, train_dataset.word_vectors
+    test_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'test', padding=False, word_embeddings=word_embd,
                                       alpha_dropout=0.0, WORD_EMBD_DIM=WORD_EMBEDDING_DIM)
     test_dataloader = DataLoader(test_dataset, shuffle=False)
 
@@ -336,7 +342,7 @@ def tag_comp_file(NET_PATH, tag_file_path, file_prefix="", model_type=0):
 
 ##################################################################################################################
 if __name__ == '__main__':
-    run_base_model()
+    #run_base_model()
     run_adv_model()
     #run_different_combos()
     #NET_PATH_base = r"/home/student/NLP_HW_2/submission/_epoch_6_acc_0.8852.pt"

@@ -195,14 +195,15 @@ class PosDataset(Dataset):
             pos_idx_list = []
             head_idx_list = []
             for word, pos, head_idx in sentence:
-                word_app = self.datareader.word_dict.get(word)
-                word_app = 0 if word_app is None else word_app
+                word_count = self.datareader.word_dict.get(word)
+                word_count = 0 if word_count is None else word_count
 
-                if  word != ROOT_TOKEN:
-                    if word_app + self.alpha_dropout != 0:
+                if word != ROOT_TOKEN:
+                    if word_count + self.alpha_dropout != 0:
                         prob_for_drop = self.alpha_dropout / (word_app + self.alpha_dropout)
                     else:
                         prob_for_drop=1
+
                     if prob_for_drop > np.random.rand():
                         word = UNKNOWN_TOKEN
 
