@@ -44,17 +44,20 @@ DEBUG = None
 def plot_net_results(acc_list, loss_list, epoch, dir_save_path, prefix_str=""):
 
     f = plt.figure()
-    axes = f.add_subplot(111)
+    axes = f.add_subplot(121)
     axes.plot(list(range(1, 1 + len(loss_list))), loss_list, color='red', label='loss')
     axes.set_xlabel('Epoch')
     axes.set_ylabel('Loss')
+    axes.set_title("loss graph")
+    axes.legend()
 
     if len(acc_list) != 0:
+        axes = f.add_subplot(122)
+        axes.set_title("accuracy graph")
         axes.plot(list(range(len(acc_list))), acc_list, color='blue', label='acc')
         axes.set_ylabel('UAS')
         axes.tick_params(axis='y')
         axes.legend()
-    axes.set_title(f'Results summary for epoch: {epoch} ')
     f.tight_layout()
     if len(acc_list) != 0:
         f.savefig(opj(dir_save_path, prefix_str + f"final acc_{round(acc_list[-1],3)}_prog_plot_epoch {epoch}.png"))
@@ -116,10 +119,11 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
     print("Training Started")
     test_loss_lst, test_acc_lst, train_loss_lst= [], [], []
     best_acc = 0
+    best_loss = 1000
     for epoch in range(EPOCHS):
-        if epoch == 4:
+        if epoch == 8:
             net.word_embedding.weight.requires_grad = True
-        if change_lr and epoch >0 and epoch % 5 == 0:
+        if change_lr and epoch >0 and epoch % 2 == 0:
             for g in optimizer.param_groups:
                 g['lr'] *= 1e-1
 
@@ -150,10 +154,11 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
         test_loss_lst.append(test_loss)
         test_acc_lst.append(test_acc)
 
-        if best_acc < test_acc and epoch > 5 and test_acc > 0.7:
+        if best_loss > train_loss_lst[-1] and best_acc < test_acc and epoch > 3 and test_acc > 0.7:
             save_path = opj(results_dir_path, '_epoch_' + str(epoch) + '_acc_' + str(np.round(test_acc, 4)) + '.pt')
             net.save(save_path)
             best_acc = test_acc
+            print("saved new module")
 
         print(f"\nEpoch [{epoch + 1}/{EPOCHS}]. \t Test sentence avg loss: {test_loss:.{ROUND_NUM_DIGITS}f}"
               f" \t Test Accuracy: {test_acc:.{ROUND_NUM_DIGITS}f}"
@@ -236,10 +241,10 @@ def write_comp(path_file_r,path_file_w,predictions):
 ##################################################################################################################
 def run_adv_model():
     WORD_EMBEDDING_DIM = 50
-    TAG_EMBEDDING_DIM = 50
+    TAG_EMBEDDING_DIM = 30
     LSTM_HIDDEN_DIM = 125
-    MLP_HIDDEN_DIM = 200
-    BATCH_SIZE = 40
+    MLP_HIDDEN_DIM = 100
+    BATCH_SIZE = 20
     EPOCHS = 20
     LR = 0.01
     CHANGE_LR=True
@@ -338,7 +343,7 @@ def tag_comp_file(NET_PATH, tag_file_path, file_prefix="", model_type=0):
 
 ##################################################################################################################
 if __name__ == '__main__':
-    #run_base_model()
+    run_base_model()
     run_adv_model()
     #run_different_combos()
     #NET_PATH_base = r"/home/student/NLP_HW_2/submission/_epoch_6_acc_0.8852.pt"
