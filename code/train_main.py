@@ -184,7 +184,7 @@ def run_base_model():
     TAG_EMBEDDING_DIM = 25
     LSTM_HIDDEN_DIM = 125
     MLP_HIDDEN_DIM = 100
-    BATCH_SIZE = 50
+    BATCH_SIZE = 20
     EPOCHS = 20
     LR = 0.01
 
@@ -247,8 +247,8 @@ def write_comp(path_file_r,path_file_w,predictions):
 
 ##################################################################################################################
 def run_adv_model():
-    WORD_EMBEDDING_DIM = 50
-    TAG_EMBEDDING_DIM = 30
+    WORD_EMBEDDING_DIM = 80
+    TAG_EMBEDDING_DIM = 40
     LSTM_HIDDEN_DIM = 125
     MLP_HIDDEN_DIM = 100
     BATCH_SIZE = 20
