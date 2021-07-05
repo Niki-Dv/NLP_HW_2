@@ -117,7 +117,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
     test_loss_lst, test_acc_lst, train_loss_lst= [], [], []
     best_acc = 0
     for epoch in range(EPOCHS):
-        if epoch == 5:
+        if epoch == 4:
             net.word_embedding.weight.requires_grad = True
         if change_lr and epoch >0 and epoch % 5 == 0:
             for g in optimizer.param_groups:
@@ -133,11 +133,11 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
             num_words_in_batch += sentence[3].item()
             scores = net(sentence)
             loss = loss_func(scores, headers)
-
+            
+            total_loss += loss.item()
             if consider_sentence_len:
                 loss *= sentence[3].to(device).item()
 
-            total_loss += loss.item()
             loss= loss/BATCH_SIZE
             loss.backward()
 

@@ -200,7 +200,7 @@ class PosDataset(Dataset):
 
                 if word != ROOT_TOKEN:
                     if word_count + self.alpha_dropout != 0:
-                        prob_for_drop = self.alpha_dropout / (word_app + self.alpha_dropout)
+                        prob_for_drop = self.alpha_dropout / (word_count + self.alpha_dropout)
                     else:
                         prob_for_drop=1
 
