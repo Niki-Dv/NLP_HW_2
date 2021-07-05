@@ -108,7 +108,7 @@ def predict(net, device, loader, loss_func):
     return acc / num_of_edges, loss / len(loader)
 ##################################################################################################################
 def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCHS = 15, BATCH_SIZE = 1, lr=0.001,
-              plot_progress=True, results_dir_path='.', change_lr=False, consider_sentence_len=False):
+              results_dir_path='.', change_lr=False, consider_sentence_len=False):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device used is: {device}")
@@ -117,7 +117,9 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
     optimizer = optim.Adam(net.parameters(), lr=lr)
 
     print("Training Started")
-    test_loss_lst, test_acc_lst, train_loss_lst= [], [], []
+    test_loss_lst, test_acc_lst = [], []
+    train_loss_lst, train_acc_lst = [], []
+
     best_acc = 0
     best_loss = 1000
     for epoch in range(EPOCHS):
@@ -149,10 +151,15 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
                 num_words_in_batch = 0
                 optimizer.step()
                 net.zero_grad()
-        train_loss_lst.append(total_loss/len(train_dataloader))
+
+        #train_loss_lst.append(total_loss/len(train_dataloader))
         test_acc, test_loss = predict(net, device, test_dataloader, loss_func)
+        train_acc, train_loss = predict(net, device, train_dataloader, loss_func)
+
         test_loss_lst.append(test_loss)
         test_acc_lst.append(test_acc)
+        train_acc_lst.append(train_acc)
+        train_acc_lst.append(train_loss)
 
         if best_loss > train_loss_lst[-1] and best_acc < test_acc and epoch > 3 and test_acc > 0.7:
             save_path = opj(results_dir_path, '_epoch_' + str(epoch) + '_acc_' + str(np.round(test_acc, 4)) + '.pt')
@@ -162,15 +169,15 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
 
         print(f"\nEpoch [{epoch + 1}/{EPOCHS}]. \t Test sentence avg loss: {test_loss:.{ROUND_NUM_DIGITS}f}"
               f" \t Test Accuracy: {test_acc:.{ROUND_NUM_DIGITS}f}"
+              f" \t Train Accuracy: {train_acc:.{ROUND_NUM_DIGITS}f}"
               f"\t Train sentence avg loss: {train_loss_lst[-1]:.{ROUND_NUM_DIGITS}f}"
               f"\t Time for epoch: {time.time()-t0}")
 
     plot_net_results(test_acc_lst, test_loss_lst, epoch, results_dir_path, 'test_res_plots')
-
-    if plot_progress:
-        plot_net_results([], train_loss_lst, epoch, results_dir_path, 'train_res_plots')
+    plot_net_results(train_acc_lst, train_loss_lst, epoch, results_dir_path, 'train_res_plots')
 
     return np.max(test_acc_lst)
+
 ##################################################################################################################
 def run_base_model():
     WORD_EMBEDDING_DIM = 100
@@ -178,7 +185,7 @@ def run_base_model():
     LSTM_HIDDEN_DIM = 125
     MLP_HIDDEN_DIM = 100
     BATCH_SIZE = 50
-    EPOCHS = 20
+    EPOCHS = 1
     LR = 0.01
 
     paths_list = [path_train]
@@ -202,7 +209,7 @@ def run_base_model():
         os.makedirs(res_dir)
 
     train_net(base_model, train_dataloader, test_dataloader, nll_loss_func, EPOCHS=EPOCHS, BATCH_SIZE=BATCH_SIZE, lr=LR,
-              plot_progress=True, results_dir_path=res_dir)
+              results_dir_path=res_dir)
 
 ##################################################################################################################
 def score_to_mst(scores):
@@ -249,7 +256,7 @@ def run_adv_model():
     LR = 0.01
     CHANGE_LR=True
 
-    paths_list = [path_train,path_comp,path_test]
+    paths_list = [path_train, path_comp, path_test]
     word_dict, pos_dict = dataset.get_vocabs(paths_list)
     train_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'train', padding=False,
                                        alpha_dropout=0.0, WORD_EMBD_DIM=WORD_EMBEDDING_DIM)
@@ -273,7 +280,7 @@ def run_adv_model():
         os.makedirs(res_dir)
 
     train_net(base_model, train_dataloader, test_dataloader, nll_loss_func, EPOCHS=EPOCHS, BATCH_SIZE=BATCH_SIZE, lr=LR,
-              plot_progress=True, results_dir_path=res_dir, change_lr=CHANGE_LR, consider_sentence_len=True)
+              results_dir_path=res_dir, change_lr=CHANGE_LR, consider_sentence_len=True)
 
 def run_different_combos():
     WORD_EMBEDDING_DIM_OPTIONS = [50, 100, 200]
@@ -312,8 +319,9 @@ def run_different_combos():
         if not os.path.isdir(res_dir):
             os.makedirs(res_dir)
 
-        results_dict[combo] = train_net(base_model, train_dataloader, test_dataloader, nll_loss_func, EPOCHS=EPOCHS, BATCH_SIZE=BATCH_SIZE,
-                  lr=LR, plot_progress=True, results_dir_path=res_dir, change_lr=CHANGE_LR, consider_sentence_len=True)
+        results_dict[combo] = train_net(base_model, train_dataloader, test_dataloader, nll_loss_func, EPOCHS=EPOCHS,
+                                        BATCH_SIZE=BATCH_SIZE, lr=LR, results_dir_path=res_dir, change_lr=CHANGE_LR,
+                                        consider_sentence_len=True)
 
         with open(opj(net_results_dir, "final_combos_results.pkl"), 'wb') as f:
             pickle.dump(results_dict, f,  protocol=pickle.HIGHEST_PROTOCOL)
