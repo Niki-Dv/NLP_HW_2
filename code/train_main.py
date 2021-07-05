@@ -181,7 +181,7 @@ def run_base_model():
     train_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'train', padding=False)
     train_dataloader = DataLoader(train_dataset, shuffle=True)
 
-    test_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'test', padding=False, word_embeddings=None, alpha_dropout=0.0)
+    test_dataset = dataset.PosDataset(word_dict, pos_dict, data_dir, 'test', padding=False, alpha_dropout=0.0)
     test_dataloader = DataLoader(test_dataset, shuffle=False)
 
     word_vocab_size = len(train_dataset.word_idx_mappings)
