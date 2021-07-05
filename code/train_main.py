@@ -125,7 +125,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
     for epoch in range(EPOCHS):
         if epoch == 8:
             net.word_embedding.weight.requires_grad = True
-        if change_lr and epoch >0 and epoch % 2 == 0:
+        if change_lr and epoch > 0 and epoch % 2 == 0:
             for g in optimizer.param_groups:
                 g['lr'] *= 1e-1
 
@@ -159,7 +159,7 @@ def train_net(net, train_dataloader, test_dataloader, loss_func: Callable, EPOCH
         test_loss_lst.append(test_loss)
         test_acc_lst.append(test_acc)
         train_acc_lst.append(train_acc)
-        train_acc_lst.append(train_loss)
+        train_loss_lst.append(train_loss)
 
         if best_loss > train_loss_lst[-1] and best_acc < test_acc and epoch > 3 and test_acc > 0.7:
             save_path = opj(results_dir_path, '_epoch_' + str(epoch) + '_acc_' + str(np.round(test_acc, 4)) + '.pt')
