@@ -185,7 +185,7 @@ def run_base_model():
     LSTM_HIDDEN_DIM = 125
     MLP_HIDDEN_DIM = 100
     BATCH_SIZE = 50
-    EPOCHS = 1
+    EPOCHS = 20
     LR = 0.01
 
     paths_list = [path_train]
