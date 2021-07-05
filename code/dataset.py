@@ -129,10 +129,12 @@ class PosDataset(Dataset):
 
         self.alpha_dropout = alpha_dropout
 
-        assert subset in ['train', 'test']
+        assert subset in ['train', 'test', 'comp']
         self.subset = subset
-
-        self.file = opj(dir_path, subset + ".labeled")
+        if subset == 'comp':
+            self.file = opj(dir_path, subset + ".unlabeled")
+        else:
+            self.file = opj(dir_path, subset + ".labeled")
 
         self.datareader = PosDataReader(self.file, word_dict, pos_dict)
 
